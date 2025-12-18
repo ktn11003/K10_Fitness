@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "name": "fitness-os",
+  "builds": [
+    {
+      "src": "backend/backend.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "backend/backend.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "PYTHON_VERSION": "3.9"
+  }
+}
