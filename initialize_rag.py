@@ -1,36 +1,33 @@
-import numpy as np
 import faiss
-from sentence_transformers import SentenceTransformer
 import json
+import numpy as np
+from sentence_transformers import SentenceTransformer
 
-# Load a lightweight model for Vercel's memory limits
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
-def generate_synthetic_scenarios():
+def setup_knowledge():
+    # These are your "Lessons" for the AI
     scenarios = [
-        "User slept 8 hours, ate 3500kcal, successfully completed Push workout with 4x8 bench press.",
-        "User slept 5 hours, increased caffeine, hit targets but felt high fatigue.",
-        "User missed Lunch, compensated with high-calorie Dinner, maintained weight stability.",
-        "User hit 100% hydration, reported improved recovery and lower muscle soreness."
+        "Scenario: Slept < 6 hours. Advice: Reduce weight by 10% today to prevent injury.",
+        "Scenario: Hit all calorie goals. Advice: High energy detected! Try to add 2kg to your main lift.",
+        "Scenario: Missed hydration target. Advice: Drink 500ml water before starting your workout.",
+        "Scenario: Perfect sleep and nutrition. Advice: Great day! Follow your standard progression plan."
     ]
-    # In a real run, we would generate 500-1000 of these
-    return scenarios
-
-def create_index():
-    scenarios = generate_synthetic_scenarios()
+    
+    # Convert text to vectors (numbers)
     embeddings = model.encode(scenarios)
     
-    # Create FAISS Index
+    # Create the FAISS Index (The search engine file)
     dimension = embeddings.shape[1]
     index = faiss.IndexFlatL2(dimension)
     index.add(embeddings.astype('float32'))
     
-    # Save index and metadata
+    # Save the files
     faiss.write_index(index, "fitness_os.index")
     with open("metadata.json", "w") as f:
         json.dump(scenarios, f)
     
-    print(f"RAG Index initialized with {len(scenarios)} scenarios.")
+    print("Files created: fitness_os.index and metadata.json. Now upload these to GitHub!")
 
 if __name__ == "__main__":
-    create_index()
+    setup_knowledge()
