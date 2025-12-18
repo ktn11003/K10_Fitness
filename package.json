@@ -1,0 +1,12 @@
+{
+  "name": "fitness-os",
+  "version": "1.0.0",
+  "description": "Personal Fitness Operating System",
+  "scripts": {
+    "dev": "python -m http.server 3000",
+    "build": "echo 'No build needed - static HTML'"
+  },
+  "keywords": ["fitness", "tracking", "rag", "ai"],
+  "author": "Your Name",
+  "license": "MIT"
+}
