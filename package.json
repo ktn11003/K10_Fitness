@@ -3,15 +3,10 @@
   "version": "1.0.0",
   "description": "Personal Fitness Operating System",
   "scripts": {
-    "dev": "python backend/backend.py",
+    "dev": "vercel dev",
     "build": "echo 'Static assets ready'"
   },
-  "keywords": [
-    "fitness",
-    "tracking",
-    "rag",
-    "ai"
-  ],
+  "keywords": ["fitness", "tracking", "rag", "ai"],
   "author": "Your Name",
   "license": "MIT"
 }
