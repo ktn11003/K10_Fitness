@@ -6,6 +6,18 @@
       "src": "backend/backend.py",
       "use": "@vercel/python",
       "config": { "runtime": "python3.11" }
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.js",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.css",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -14,8 +26,12 @@
       "dest": "backend/backend.py"
     },
     {
+      "src": "/app.js",
+      "dest": "/app.js"
+    },
+    {
       "src": "/(.*)",
-      "dest": "index.html"
+      "dest": "/index.html"
     }
   ]
 }
