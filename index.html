@@ -1,23 +1,438 @@
-{
-  "version": 2,
-  "name": "fitness-os",
-  "builds": [
-    {
-      "src": "backend/backend.py",
-      "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "backend/backend.py"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ],
-  "env": {
-    "PYTHON_VERSION": "3.9"
-  }
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness OS - Your Personal Training System</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* Loading animation */
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <!-- Loading state -->
+        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;">
+            <div class="spinner"></div>
+            <p style="margin-top: 20px; color: #666;">Loading Fitness OS...</p>
+        </div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Lucide React Icons (inline simplified versions)
+        const Calendar = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
+        const Dumbbell = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.4 14.4L9.6 9.6"/><path d="M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.829 2.829z"/><path d="M21.5 21.5l-1.4-1.4"/><path d="M3.9 3.9l1.4 1.4"/><path d="M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.829-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"/></svg>;
+        const Utensils = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>;
+        const Droplets = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/></svg>;
+        const Moon = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>;
+        const Weight = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="5" r="3"/><line x1="12" y1="22" x2="12" y2="8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/></svg>;
+        const CheckCircle = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
+        const XCircle = (props) => <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>;
+
+        const FitnessOS = () => {
+            const [currentTab, setCurrentTab] = useState('today');
+            const [dayData, setDayData] = useState({
+                date: new Date().toISOString().split('T')[0],
+                dayIndex: 0,
+                planned: {
+                    workout: 'push',
+                    mealsKcal: 3550,
+                    hydrationMl: 3200,
+                    meals: [
+                        { time: '08:00', kcal: 600, name: 'Breakfast' },
+                        { time: '11:00', kcal: 550, name: 'Mid-Morning' },
+                        { time: '14:00', kcal: 700, name: 'Lunch' },
+                        { time: '17:00', kcal: 550, name: 'Pre-Workout' },
+                        { time: '20:00', kcal: 700, name: 'Post-Workout' },
+                        { time: '22:30', kcal: 450, name: 'Dinner' }
+                    ],
+                    hydrationWindows: [
+                        { name: 'Morning', ml: 800, time: '06:00-12:00' },
+                        { name: 'Afternoon', ml: 800, time: '12:00-17:00' },
+                        { name: 'Evening', ml: 800, time: '17:00-21:00' },
+                        { name: 'Night', ml: 800, time: '21:00-23:00' }
+                    ],
+                    workoutSets: [
+                        { exercise: 'Bench Press', sets: 4, reps: 8 },
+                        { exercise: 'Overhead Press', sets: 3, reps: 10 },
+                        { exercise: 'Incline DB Press', sets: 3, reps: 12 },
+                        { exercise: 'Lateral Raises', sets: 3, reps: 15 },
+                        { exercise: 'Tricep Pushdowns', sets: 3, reps: 12 }
+                    ]
+                },
+                logged: {
+                    weight: null,
+                    sleepTime: null,
+                    wakeTime: null,
+                    meals: [],
+                    hydration: [],
+                    workoutSets: []
+                },
+                derivedMetrics: {
+                    sleepDurationMin: null,
+                    hydrationAdherencePct: 0,
+                    calorieSurplus: 0,
+                    workoutDurationMin: null
+                },
+                confidenceFlags: {
+                    weightLogged: false,
+                    hydrationComplete: false,
+                    sleepComplete: false,
+                    nutritionComplete: false,
+                    workoutComplete: false
+                },
+                dataQualityScore: 0
+            });
+
+            useEffect(() => {
+                calculateMetrics();
+            }, [dayData.logged]);
+
+            const calculateMetrics = () => {
+                const { logged, planned } = dayData;
+                const newMetrics = { ...dayData.derivedMetrics };
+                const newFlags = { ...dayData.confidenceFlags };
+
+                if (logged.sleepTime && logged.wakeTime) {
+                    const sleep = new Date(logged.sleepTime);
+                    const wake = new Date(logged.wakeTime);
+                    newMetrics.sleepDurationMin = Math.floor((wake - sleep) / 60000);
+                    newFlags.sleepComplete = true;
+                }
+
+                const totalLogged = logged.hydration.reduce((sum, h) => sum + (h.ml || 0), 0);
+                newMetrics.hydrationAdherencePct = Math.round((totalLogged / planned.hydrationMl) * 100);
+                newFlags.hydrationComplete = logged.hydration.length === planned.hydrationWindows.length;
+
+                const totalCalories = logged.meals.reduce((sum, m) => sum + (m.kcal || 0), 0);
+                newMetrics.calorieSurplus = totalCalories - planned.mealsKcal;
+                newFlags.nutritionComplete = logged.meals.length === planned.meals.length;
+
+                newFlags.weightLogged = logged.weight !== null && logged.weight > 0;
+
+                newFlags.workoutComplete = logged.workoutSets.length === planned.workoutSets.reduce((sum, s) => sum + s.sets, 0);
+                
+                if (logged.workoutSets.length > 0) {
+                    const first = new Date(logged.workoutSets[0].timestamp);
+                    const last = new Date(logged.workoutSets[logged.workoutSets.length - 1].timestamp);
+                    newMetrics.workoutDurationMin = Math.floor((last - first) / 60000) || 5;
+                }
+
+                const flags = Object.values(newFlags);
+                const score = flags.filter(Boolean).length / flags.length;
+                
+                setDayData(prev => ({
+                    ...prev,
+                    derivedMetrics: newMetrics,
+                    confidenceFlags: newFlags,
+                    dataQualityScore: Math.round(score * 100) / 100
+                }));
+            };
+
+            const logWeight = (weight) => {
+                if (weight > 0) {
+                    setDayData(prev => ({
+                        ...prev,
+                        logged: {
+                            ...prev.logged,
+                            weight: parseFloat(weight),
+                            weightTimestamp: new Date().toISOString()
+                        }
+                    }));
+                }
+            };
+
+            const logSleep = () => {
+                setDayData(prev => ({
+                    ...prev,
+                    logged: {
+                        ...prev.logged,
+                        sleepTime: new Date().toISOString()
+                    }
+                }));
+            };
+
+            const logWake = () => {
+                if (!dayData.logged.sleepTime) {
+                    alert('Error: Must log sleep time before wake time');
+                    return;
+                }
+                setDayData(prev => ({
+                    ...prev,
+                    logged: {
+                        ...prev.logged,
+                        wakeTime: new Date().toISOString()
+                    }
+                }));
+            };
+
+            const logHydration = (windowIndex, ml) => {
+                const newHydration = [...dayData.logged.hydration];
+                newHydration[windowIndex] = {
+                    ml: parseInt(ml) || 0,
+                    loggedAt: ml > 0 ? new Date().toISOString() : null,
+                    windowName: dayData.planned.hydrationWindows[windowIndex].name
+                };
+                setDayData(prev => ({
+                    ...prev,
+                    logged: {
+                        ...prev.logged,
+                        hydration: newHydration
+                    }
+                }));
+            };
+
+            const logMeal = (mealIndex, kcal) => {
+                const newMeals = [...dayData.logged.meals];
+                newMeals[mealIndex] = {
+                    mealName: dayData.planned.meals[mealIndex].name,
+                    kcal: parseInt(kcal) || 0,
+                    loggedAt: kcal > 0 ? new Date().toISOString() : null
+                };
+                setDayData(prev => ({
+                    ...prev,
+                    logged: {
+                        ...prev.logged,
+                        meals: newMeals
+                    }
+                }));
+            };
+
+            const logWorkoutSet = (exerciseIndex, setNum, actualReps) => {
+                const exercise = dayData.planned.workoutSets[exerciseIndex];
+                const newSet = {
+                    exercise: exercise.exercise,
+                    setNumber: setNum,
+                    plannedReps: exercise.reps,
+                    actualReps: parseInt(actualReps) || 0,
+                    timestamp: new Date().toISOString()
+                };
+                setDayData(prev => ({
+                    ...prev,
+                    logged: {
+                        ...prev.logged,
+                        workoutSets: [...prev.logged.workoutSets, newSet]
+                    }
+                }));
+            };
+
+            const StatusBadge = ({ complete }) => (
+                complete ? 
+                    <CheckCircle className="w-4 h-4 text-green-500" /> : 
+                    <XCircle className="w-4 h-4 text-gray-400" />
+            );
+
+            const TodayView = () => (
+                <div className="space-y-4">
+                    <div className="bg-white rounded-lg shadow p-4">
+                        <div className="flex justify-between items-center mb-2">
+                            <h2 className="text-lg font-semibold">Day {dayData.dayIndex}</h2>
+                            <span className="text-sm text-gray-500">{dayData.date}</span>
+                        </div>
+                        <div className="text-2xl font-bold text-blue-600">
+                            Quality: {(dayData.dataQualityScore * 100).toFixed(0)}%
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow p-4">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                                <Weight className="w-5 h-5 text-purple-600" />
+                                <h3 className="font-semibold">Weight</h3>
+                            </div>
+                            <StatusBadge complete={dayData.confidenceFlags.weightLogged} />
+                        </div>
+                        {dayData.logged.weight ? (
+                            <div className="text-2xl font-bold">{dayData.logged.weight} kg</div>
+                        ) : (
+                            <div className="flex gap-2">
+                                <input
+                                    type="number"
+                                    step="0.1"
+                                    placeholder="Weight (kg)"
+                                    className="flex-1 px-3 py-2 border rounded"
+                                    onKeyPress={(e) => {
+                                        if (e.key === 'Enter') {
+                                            logWeight(e.target.value);
+                                            e.target.value = '';
+                                        }
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow p-4">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                                <Moon className="w-5 h-5 text-indigo-600" />
+                                <h3 className="font-semibold">Sleep</h3>
+                            </div>
+                            <StatusBadge complete={dayData.confidenceFlags.sleepComplete} />
+                        </div>
+                        <div className="space-y-2">
+                            {!dayData.logged.sleepTime ? (
+                                <button
+                                    onClick={logSleep}
+                                    className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
+                                >
+                                    Going to Sleep
+                                </button>
+                            ) : !dayData.logged.wakeTime ? (
+                                <>
+                                    <div className="text-sm text-gray-600">
+                                        Sleep: {new Date(dayData.logged.sleepTime).toLocaleTimeString()}
+                                    </div>
+                                    <button
+                                        onClick={logWake}
+                                        className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+                                    >
+                                        I'm Awake
+                                    </button>
+                                </>
+                            ) : (
+                                <div className="space-y-1">
+                                    <div className="text-sm text-gray-600">
+                                        Sleep: {new Date(dayData.logged.sleepTime).toLocaleTimeString()}
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                        Wake: {new Date(dayData.logged.wakeTime).toLocaleTimeString()}
+                                    </div>
+                                    <div className="text-lg font-bold text-green-600">
+                                        Duration: {dayData.derivedMetrics.sleepDurationMin} min ({(dayData.derivedMetrics.sleepDurationMin / 60).toFixed(1)}h)
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Similar cards for Hydration, Nutrition, Workout - abbreviated for space */}
+                    <div className="bg-white rounded-lg shadow p-4">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                                <Droplets className="w-5 h-5 text-cyan-600" />
+                                <h3 className="font-semibold">Hydration</h3>
+                            </div>
+                            <StatusBadge complete={dayData.confidenceFlags.hydrationComplete} />
+                        </div>
+                        <div className="mb-3 text-lg font-bold text-cyan-600">
+                            {dayData.derivedMetrics.hydrationAdherencePct}% Complete
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow p-4">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                                <Utensils className="w-5 h-5 text-orange-600" />
+                                <h3 className="font-semibold">Nutrition</h3>
+                            </div>
+                            <StatusBadge complete={dayData.confidenceFlags.nutritionComplete} />
+                        </div>
+                        <div className="text-lg font-bold">
+                            Surplus: <span className={dayData.derivedMetrics.calorieSurplus >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                {dayData.derivedMetrics.calorieSurplus > 0 ? '+' : ''}{dayData.derivedMetrics.calorieSurplus} kcal
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const AnalysisView = () => (
+                <div className="space-y-4">
+                    <div className="bg-white rounded-lg shadow p-4">
+                        <h3 className="font-semibold mb-4">Today's Analysis</h3>
+                        <div className="space-y-3">
+                            <div className="flex justify-between items-center pb-2 border-b">
+                                <span>Data Quality Score</span>
+                                <span className="font-bold text-blue-600">{(dayData.dataQualityScore * 100).toFixed(0)}%</span>
+                            </div>
+                            <div className="flex justify-between items-center pb-2 border-b">
+                                <span>Weight Logged</span>
+                                <StatusBadge complete={dayData.confidenceFlags.weightLogged} />
+                            </div>
+                            <div className="flex justify-between items-center pb-2 border-b">
+                                <span>Sleep Complete</span>
+                                <StatusBadge complete={dayData.confidenceFlags.sleepComplete} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <div className="bg-white shadow-sm border-b sticky top-0 z-10">
+                        <div className="max-w-4xl mx-auto px-4 py-4">
+                            <h1 className="text-2xl font-bold text-gray-900">Fitness OS</h1>
+                            <p className="text-sm text-gray-500">12-Week Bulk Program</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white border-b sticky top-[72px] z-10">
+                        <div className="max-w-4xl mx-auto px-4">
+                            <div className="flex gap-1">
+                                {['today', 'analysis'].map((tab) => (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setCurrentTab(tab)}
+                                        className={`px-6 py-3 font-medium capitalize transition-colors ${
+                                            currentTab === tab
+                                                ? 'text-blue-600 border-b-2 border-blue-600'
+                                                : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                    >
+                                        {tab}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-4xl mx-auto px-4 py-6 pb-24">
+                        {currentTab === 'today' && <TodayView />}
+                        {currentTab === 'analysis' && <AnalysisView />}
+                    </div>
+                </div>
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<FitnessOS />);
+    </script>
+</body>
+</html>
